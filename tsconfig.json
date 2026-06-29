@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "components/questoes/questao_intro_card.tsx"  ],
   "exclude": ["node_modules"]
 }
