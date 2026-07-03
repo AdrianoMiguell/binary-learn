@@ -1,5 +1,4 @@
 import { pgTable, integer, varchar, boolean } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 import { questoesTable } from "./questoes_schemas";
 
 export const alternativasTable = pgTable("alternativas", {
@@ -10,9 +9,3 @@ export const alternativasTable = pgTable("alternativas", {
   grupoLigacao: integer("grupo_ligacao"),
 });
 
-export const alternativasRelations = relations(alternativasTable, ({ one }) => ({
-  questao: one(questoesTable, {
-    fields: [alternativasTable.questaoId],
-    references: [questoesTable.id],
-  }),
-}));

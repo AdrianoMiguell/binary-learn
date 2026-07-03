@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuthStore } from "@/app/store/auth/auth_store";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -14,38 +16,50 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { signUpNewUser } from "@/db/services/auth_service";
-import { Eye, EyeOff } from "lucide-react";
+import { signInWithEmail } from "@/db/services/auth_service";
+import { PerfisService } from "@/db/services/perfis_service";
+import { AlertCircle, AlertCircleIcon, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import React, { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
-export default function registerPage() {
+export default function loginPage() {
   const [visible, setVisible] = useState(false);
-  const [state, formAction, isPending] = useActionState(signUpNewUser, {
-    success: false,
+  const setUser = useAuthStore((state) => state.setUser); // <-- Pega a função de salvar do Zustand
+
+  const [state, formAction, isPending] = useActionState(signInWithEmail, {
+    data: null,
     error: null,
+    success: false,
   });
 
+  useEffect(() => {
+    if (state.success && state.data?.id) {
+      const emailSave = state.payload?.get("email") as string;
+      const username = state.data.username || "";
+
+      setUser({ email: emailSave, username: username });
+      window.location.href = "/";
+    }
+  }, [state, setUser]);
+
   return (
-    <form action={formAction}>
+    <form action={formAction} className="mb-5">
       <FieldGroup>
         <FieldGroup>
-          <h1 className="text-2xl font-bold">Cadastrar</h1>
+          <h1 className="text-2xl font-bold">Entrar</h1>
           <FieldDescription>
-            Crie sua conta para acessar os recursos do sistema
+            Acesse a plataforma com a sua conta e aprenda mais sobre conversões
+            númericas
           </FieldDescription>
         </FieldGroup>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="nameField">Nome</FieldLabel>
-            <Input
-              id="nameField"
-              type="text"
-              name="name"
-              defaultValue={(state?.payload?.get("name") as string) || ""}
-              placeholder="Ex: name@gmail.com"
-              required
-            />
+            {state.error != null && (
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertDescription>{state.error}</AlertDescription>
+              </Alert>
+            )}
           </Field>
           <Field>
             <FieldLabel htmlFor="emailField">Email</FieldLabel>
@@ -53,8 +67,8 @@ export default function registerPage() {
               id="emailField"
               type="email"
               name="email"
-              defaultValue={(state?.payload?.get("email") as string) || ""}
               placeholder="Ex: name@gmail.com"
+              defaultValue={(state?.payload?.get("email") as string) || ""}
               required
             />
           </Field>
@@ -70,6 +84,7 @@ export default function registerPage() {
               <InputGroupAddon align="inline-end">
                 <Button
                   variant="ghost"
+                  disabled={isPending}
                   onClick={() => setVisible(!visible)}
                   type="button"
                 >
@@ -82,10 +97,10 @@ export default function registerPage() {
             </FieldDescription>
           </Field>
           <Field orientation="horizontal" className="justify-between">
-            <Link href="/auth/login">Já tem uma conta? Entre aqui</Link>
-            <Button type="submit" disabled={isPending}>
-              Enviar
-            </Button>
+            <Link href="/register">
+              Ainda não tem uma conta? Registre-se aqui
+            </Link>
+            <Button>Enviar</Button>
           </Field>
         </FieldGroup>
       </FieldGroup>

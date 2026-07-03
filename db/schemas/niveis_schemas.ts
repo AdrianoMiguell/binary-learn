@@ -5,11 +5,9 @@ import {
   smallint,
   boolean,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { fasesTable } from "./fases_schemas";
 import { sessoesTable } from "./sessoes_schemas";
-import { questoesTable } from "./questoes_schemas";
-import { progressoUsuarioTable } from "./progresso_usuario_schemas";
+import { fasesTable } from "./fases_schemas";
+import { InferSelectModel } from "drizzle-orm";
 
 export const niveisTable = pgTable("niveis", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -18,7 +16,7 @@ export const niveisTable = pgTable("niveis", {
   icone: varchar("icone"),
   cor: varchar("cor", { length: 50 }),
   ordem: smallint("ordem"),
-  faseId: integer("fases_id").references(() => fasesTable.id, {
+  faseId: integer("fase_id").references(() => fasesTable.id, {
     onDelete: "cascade",
   }),
   sessaoId: integer("sessao_id").references(() => sessoesTable.id, {
@@ -28,15 +26,4 @@ export const niveisTable = pgTable("niveis", {
   visivel: boolean("visivel").default(true),
 });
 
-export const niveisRelations = relations(niveisTable, ({ one, many }) => ({
-  fase: one(fasesTable, {
-    fields: [niveisTable.faseId],
-    references: [fasesTable.id],
-  }),
-  sessao: one(sessoesTable, {
-    fields: [niveisTable.sessaoId],
-    references: [sessoesTable.id],
-  }),
-  questoes: many(questoesTable),
-  progressos: many(progressoUsuarioTable),
-}));
+export type NivelDados = InferSelectModel<typeof niveisTable>;

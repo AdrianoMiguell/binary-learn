@@ -1,6 +1,4 @@
 import { pgTable, integer, varchar, text, boolean } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { sessoesTable } from "./sessoes_schemas";
 
 export const areasTable = pgTable("areas", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -11,7 +9,3 @@ export const areasTable = pgTable("areas", {
   ordem: integer("ordem"),
   visivel: boolean("visivel").default(true),
 });
-
-export const areasRelations = relations(areasTable, ({ many }) => ({
-  sessoes: many(sessoesTable),
-}));

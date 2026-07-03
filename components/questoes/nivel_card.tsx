@@ -10,7 +10,7 @@ interface NivelCardProps {
   nivelId: number;
   faseId: number;
   bloqueado?: boolean;
-  estrelas?: number; // 0, 1, 2 ou 3
+  estrelas?: number;
 }
 
 export default function NivelCard({
@@ -26,13 +26,13 @@ export default function NivelCard({
     <div
       onClick={() => !bloqueado && router.push(`/fase/${faseId}/nivel/${nivelId}/questao`)}
       className={cn(
-        "flex flex-col items-center gap-2 cursor-pointer group",
+        "flex flex-col items-center gap-x-6 gap-y-3 cursor-pointer group",
         bloqueado && "cursor-not-allowed opacity-50"
       )}
     >
       <div
         className={cn(
-          "w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold shadow-md transition-transform group-hover:scale-105",
+          "w-35 h-35 rounded-full flex items-center justify-center text-5xl font-bold shadow-md transition-transform group-hover:scale-105",
           bloqueado ? "bg-gray-400 text-gray-600" : "bg-amber-300 text-amber-900"
         )}
       >
@@ -42,7 +42,7 @@ export default function NivelCard({
         {[1, 2, 3].map((i) => (
           <Star
             key={i}
-            size={16}
+            size={24}
             className={cn(i <= estrelas ? "fill-amber-400 text-amber-400" : "text-gray-400")}
           />
         ))}

@@ -1,6 +1,5 @@
 "use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -15,36 +14,38 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { signInWithEmail } from "@/db/services/auth_service";
-import { AlertCircle, AlertCircleIcon, Eye, EyeOff } from "lucide-react";
+import { signUpNewUser } from "@/db/services/auth_service";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import React, { useActionState, useState } from "react";
 
-export default function loginPage() {
+export default function registerPage() {
   const [visible, setVisible] = useState(false);
-  const [state, formAction, isPending] = useActionState(signInWithEmail, {
-    error: null,
+  const [state, formAction, isPending] = useActionState(signUpNewUser, {
     success: false,
+    error: null,
   });
 
   return (
-    <form action={formAction} className="mb-5">
+    <form action={formAction}>
       <FieldGroup>
         <FieldGroup>
-          <h1 className="text-2xl font-bold">Entrar</h1>
+          <h1 className="text-2xl font-bold">Cadastrar</h1>
           <FieldDescription>
-            Acesse a plataforma com a sua conta e aprenda mais sobre conversões
-            númericas
+            Crie sua conta para acessar os recursos do sistema
           </FieldDescription>
         </FieldGroup>
         <FieldGroup>
           <Field>
-            {state.error != null && (
-              <Alert variant="destructive">
-                <AlertCircleIcon />
-                <AlertDescription>{state.error}</AlertDescription>
-              </Alert>
-            )}
+            <FieldLabel htmlFor="usernameField">Nome</FieldLabel>
+            <Input
+              id="usernameField"
+              type="text"
+              name="username"
+              defaultValue={(state?.payload?.get("username") as string) || ""}
+              placeholder="Ex: Adriano"
+              required
+            />
           </Field>
           <Field>
             <FieldLabel htmlFor="emailField">Email</FieldLabel>
@@ -52,8 +53,8 @@ export default function loginPage() {
               id="emailField"
               type="email"
               name="email"
-              placeholder="Ex: name@gmail.com"
               defaultValue={(state?.payload?.get("email") as string) || ""}
+              placeholder="Ex: name@gmail.com"
               required
             />
           </Field>
@@ -69,7 +70,6 @@ export default function loginPage() {
               <InputGroupAddon align="inline-end">
                 <Button
                   variant="ghost"
-                  disabled={isPending}
                   onClick={() => setVisible(!visible)}
                   type="button"
                 >
@@ -82,10 +82,10 @@ export default function loginPage() {
             </FieldDescription>
           </Field>
           <Field orientation="horizontal" className="justify-between">
-            <Link href="/auth/register">
-              Ainda não tem uma conta? Registre-se aqui
-            </Link>
-            <Button>Enviar</Button>
+            <Link href="/login">Já tem uma conta? Entre aqui</Link>
+            <Button type="submit" disabled={isPending}>
+              Enviar
+            </Button>
           </Field>
         </FieldGroup>
       </FieldGroup>

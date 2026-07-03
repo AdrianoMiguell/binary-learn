@@ -3,14 +3,13 @@ import { db } from "..";
 import { progressoUsuarioTable } from "../schemas/progresso_usuario_schemas";
 
 export const ProgressoUsuarioService = {
-  // Salva ou atualiza a conclusão de um nível pelo jogador
   async salvarProgresso(dados: {
     perfilId: string;
     nivelId: number;
     pontosObtidos: number;
     coracoesUsados: number;
+    estrelas: number;
   }) {
-    // Verifica se ele já jogou esse nível antes
     const existente = await db
       .select()
       .from(progressoUsuarioTable)
@@ -22,13 +21,13 @@ export const ProgressoUsuarioService = {
       );
 
     if (existente.length > 0) {
-      // Se já existia, atualiza apenas se a pontuação atual for maior
       if (dados.pontosObtidos > (existente[0].pontosObtidos ?? 0)) {
         return await db
           .update(progressoUsuarioTable)
           .set({
             pontosObtidos: dados.pontosObtidos,
             coracoesUsados: dados.coracoesUsados,
+            estrelas: dados.estrelas,   // ← adicionado
             concluida: true,
             concluidoEm: new Date(),
           })
@@ -38,7 +37,6 @@ export const ProgressoUsuarioService = {
       return existente[0];
     }
 
-    // Se é a primeira vez jogando o nível, cria o registro
     const novoProgresso = await db
       .insert(progressoUsuarioTable)
       .values({
@@ -46,6 +44,7 @@ export const ProgressoUsuarioService = {
         nivelId: dados.nivelId,
         pontosObtidos: dados.pontosObtidos,
         coracoesUsados: dados.coracoesUsados,
+        estrelas: dados.estrelas,       // ← adicionado
         concluida: true,
       })
       .returning();

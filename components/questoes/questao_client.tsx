@@ -1,4 +1,3 @@
-// components/questao_client.tsx
 "use client";
 
 import { useState } from "react";
@@ -27,48 +26,68 @@ interface QuestaoClientProps {
   questoes: Questao[];
   faseId: number;
   nivelId: number;
+  nomeNivel?: string;
 }
 
-export default function QuestaoClient({ questoes, faseId, nivelId }: QuestaoClientProps) {
+export default function QuestaoClient({
+  questoes,
+  faseId,
+  nivelId,
+  nomeNivel = "Nível",
+}: QuestaoClientProps) {
   const router = useRouter();
   const [indice, setIndice] = useState(0);
   const [xp, setXp] = useState(0);
   const [vidas, setVidas] = useState(3);
 
   const questao = questoes[indice];
-  const progressoPercent = Math.round(((indice) / questoes.length) * 100);
+  const progressoPercent = Math.round((indice / questoes.length) * 100);
+
+  // Adicione no estado
+  const [acertosCount, setAcertosCount] = useState(0);
 
   const avancar = (acertou: boolean) => {
-    if (acertou) setXp((v) => v + 10);
+    const novoXp = acertou ? xp + 10 : xp;
+    const novosAcertos = acertou ? acertosCount + 1 : acertosCount;
+
+    if (acertou) setXp(novoXp);
     else setVidas((v) => Math.max(0, v - 1));
 
+    if (acertou) setAcertosCount(novosAcertos);
+
     if (indice + 1 >= questoes.length) {
-      router.push(`/fase/${faseId}/nivel/${nivelId}/resultado?xp=${xp + (acertou ? 10 : 0)}`);
+      router.push(
+        `/fase/${faseId}/nivel/${nivelId}/resultado?xp=${novoXp}&acertos=${novosAcertos}&total=${questoes.length}`,
+      );
     } else {
       setIndice((v) => v + 1);
     }
   };
+  const voltar = () => {
+    if (indice > 0) setIndice((v) => v - 1);
+  };
 
   const handleVF = (resposta: "Verdadeiro" | "Falso") => {
     const correta = questao.alternativas.find((a) => a.is_correta);
-    const acertou = correta?.texto.toLowerCase().startsWith(resposta.toLowerCase()) ?? false;
+    const acertou =
+      correta?.texto.toLowerCase().startsWith(resposta.toLowerCase()) ?? false;
     avancar(acertou);
   };
 
   const handleQuiz = (alternativaId: number) => {
-    const correta = questao.alternativas.find((a) => a.id === alternativaId)?.is_correta ?? false;
+    const correta =
+      questao.alternativas.find((a) => a.id === alternativaId)?.is_correta ??
+      false;
     avancar(correta);
   };
 
   const handleLigar = (acertos: number) => {
-    const total = questao.alternativas.filter((a) => a.grupo_ligacao !== null).length / 2;
+    const total =
+      questao.alternativas.filter((a) => a.grupo_ligacao !== null).length / 2;
     avancar(acertos === total);
   };
 
-  // Monta os pares para a questão ligar
   const parsePares = () => {
-    const grupos = new Map<number, { ladoA?: string; ladoB?: string }>();
-    // Separa alternativas em dois lados pelo índice dentro do grupo
     const porGrupo: Record<number, Alternativa[]> = {};
     questao.alternativas.forEach((a) => {
       if (a.grupo_ligacao === null) return;
@@ -83,32 +102,47 @@ export default function QuestaoClient({ questoes, faseId, nivelId }: QuestaoClie
   };
 
   return (
-    <div className="min-h-screen bg-teal-600 p-4 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <QuestaoHeader
-        nomeNivel={`Nível ${nivelId}`}
+        nomeNivel={nomeNivel}
         progressoPercent={progressoPercent}
+        questaoAtual={indice + 1}
+        totalQuestoes={questoes.length}
         vidas={vidas}
         xp={xp}
+        podevoltar={indice > 0}
+        onVoltar={voltar}
       />
 
-      <div className="flex-1 flex flex-col justify-center gap-4">
-        <span className="text-white/60 text-xs">
-          Questão {indice + 1} de {questoes.length}
-        </span>
+      <div className="flex-1 flex flex-col px-6 py-8 max-w-2xl w-full mx-auto">
+        {/* Número da questão */}
+        <p className="text-xs text-gray-400 mb-2">
+          {indice + 1}.{" "}
+          {questao.tipo_questao === "ligar"
+            ? "Relacione corretamente"
+            : questao.tipo_questao === "vf"
+              ? "Verdadeiro ou Falso"
+              : "Múltipla escolha"}
+        </p>
+
+        {/* Enunciado grande */}
+        <h2 className="text-lg font-semibold text-gray-800 mb-8 leading-relaxed">
+          {questao.enunciado}
+        </h2>
 
         {questao.tipo_questao === "vf" && (
-          <QuestaoVF enunciado={questao.enunciado} onResponder={handleVF} />
+          <QuestaoVF enunciado="" onResponder={handleVF} />
         )}
         {questao.tipo_questao === "quiz" && (
           <QuestaoQuiz
-            enunciado={questao.enunciado}
+            enunciado=""
             alternativas={questao.alternativas}
             onResponder={handleQuiz}
           />
         )}
         {questao.tipo_questao === "ligar" && (
           <QuestaoLigar
-            enunciado={questao.enunciado}
+            enunciado=""
             pares={parsePares()}
             onResponder={handleLigar}
           />

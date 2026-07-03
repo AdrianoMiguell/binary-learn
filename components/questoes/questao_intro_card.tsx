@@ -34,7 +34,7 @@ export default function QuestaoIntroCard({
       </div>
 
       <Button
-        onClick={() => router.push(`/fase/${faseId}/nivel/${nivelId}/questao`)}
+        onClick={() => router.push(`/${faseId}/nivel/${nivelId}/questao`)}
         className="self-end bg-teal-500 hover:bg-teal-600 text-white rounded-xl px-6"
       >
         Iniciar

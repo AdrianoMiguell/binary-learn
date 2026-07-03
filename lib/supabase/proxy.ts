@@ -35,31 +35,33 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
   const pathname = request.nextUrl.pathname;
-  const isAuthRoute = pathname.startsWith("/auth");
+  // const isAuthRoute = pathname.startsWith("/auth");
 
-  const isStaticAsset =
-    pathname.startsWith("/_next") ||
-    pathname.includes(".") || // ignora arquivos como .svg, .png, favicon.ico
-    pathname.startsWith("/api");
+  // const isStaticAsset =
+  //   pathname.startsWith("/_next") ||
+  //   pathname.includes(".") || // ignora arquivos como .svg, .png, favicon.ico
+  //   pathname.startsWith("/api");
 
-  // const PROTECTED_ROUTES = ["/dashboard", "/admin"];
-
-  const isProtected = !isAuthRoute && !isStaticAsset;
+  const AUTH_ROUTES = ["/login", "/register"];
+  const isRaiz = pathname === "/";
 
   // const isProtected = PROTECTED_ROUTES.some((path) =>
   //   pathname.startsWith(path),
   // );
 
-  // if (isProtected && !user) {
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = "/auth/login";
-  //   url.searchParams.set("redirect", pathname);
-  //   return NextResponse.redirect(url);
-  // }
+  // const isProtected = !isAuthRoute && !isStaticAsset;
+  const isAuthRoutes = AUTH_ROUTES.some((path) => pathname.startsWith(path));
 
-  // if (isAuthRoute && user) {
-  //   return NextResponse.redirect(new URL("/dashboard", request.url));
-  // }
+  if (isAuthRoutes && user) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (!user && !isRaiz && !isAuthRoutes) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }

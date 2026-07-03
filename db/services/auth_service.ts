@@ -1,8 +1,14 @@
 import { createClient } from "@/lib/supabase/client";
 import { redirect } from "next/navigation";
+import { PerfisService } from "./perfis_service";
 
 type AuthState = {
   error: string | null;
+  data?: {
+    id?: string | null;
+    username?: string | null;
+    email?: string | null;
+  } | null;
   success: boolean | false;
   payload?: FormData;
 };
@@ -13,6 +19,7 @@ export async function signUpNewUser(
 ): Promise<AuthState> {
   const supabase = createClient();
 
+  const username = formData.get("username") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -27,14 +34,20 @@ export async function signUpNewUser(
   const { error } = await supabase.auth.signUp({
     email: email,
     password: password,
+    options: {
+      data: {
+        display_name: username,
+      },
+    },
   });
 
   if (error) {
     return { error: error.message, success: false, payload: formData };
   }
 
-  redirect("/dashboard");
-  //   return { error: null, success: true };
+  await supabase.auth.signOut();
+
+  redirect("/login");
 }
 
 export async function signInWithEmail(
@@ -54,7 +67,7 @@ export async function signInWithEmail(
     };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data } = await supabase.auth.signInWithPassword({
     email: email,
     password: password,
   });
@@ -63,8 +76,17 @@ export async function signInWithEmail(
     return { error: error.message, success: false, payload: formData };
   }
 
-  redirect("/dashboard");
-  //   return { error: null, success: true };
+  const id = data.user.id;
+  const username = data.user.user_metadata?.display_name as string | null;
+
+  console.log(username);
+
+  return {
+    data: { id: id, username: username },
+    error: null,
+    success: true,
+    payload: formData,
+  };
 }
 
 export async function logout(): Promise<AuthState> {
@@ -77,7 +99,7 @@ export async function logout(): Promise<AuthState> {
       return { error: error.message, success: false };
     }
 
-    redirect("/auth/login");
+    return { error: null, success: false };
   } catch (error) {
     return { error: "Erro ao executar ação", success: false };
   }

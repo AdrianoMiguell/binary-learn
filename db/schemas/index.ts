@@ -1,7 +1,6 @@
 export * from "./alternativas_schemas";
 export * from "./areas_schemas";
 export * from "./fases_schemas";
-export * from "./index";
 export * from "./loja_itens_schemas";
 export * from "./niveis_schemas";
 export * from "./perfis_schemas";
@@ -10,3 +9,4 @@ export * from "./questoes_schemas";
 export * from "./sessao_conteudos_schemas";
 export * from "./sessoes_schemas";
 export * from "./usuario_itens_schemas";
+export * from "./relations";
