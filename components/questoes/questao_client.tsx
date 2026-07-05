@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QuestaoHeader from "./questao_header";
 import QuestaoVF from "./questao_vf";
 import QuestaoQuiz from "./questao_quiz";
 import QuestaoLigar from "./questao_ligar";
+import { FaseDados, NivelDados } from "@/db/schemas";
 
 interface Alternativa {
   id: number;
@@ -26,6 +27,7 @@ interface QuestaoClientProps {
   questoes: Questao[];
   faseId: number;
   nivelId: number;
+  nomeFase?: string;
   nomeNivel?: string;
 }
 
@@ -33,6 +35,7 @@ export default function QuestaoClient({
   questoes,
   faseId,
   nivelId,
+  nomeFase = "Fase",
   nomeNivel = "Nível",
 }: QuestaoClientProps) {
   const router = useRouter();
@@ -45,6 +48,18 @@ export default function QuestaoClient({
 
   // Adicione no estado
   const [acertosCount, setAcertosCount] = useState(0);
+
+  const handleError = (message: string) => {
+    if (typeof window !== "undefined") {
+      alert(`Algo deu errado: ${message}`);
+    }
+    router.back();
+  };
+
+  useEffect(() => {
+    if (questoes == null || nivelId == null || faseId == null)
+      handleError("Dados não encontrados");
+  }, [questoes, nivelId, faseId]);
 
   const avancar = (acertou: boolean) => {
     const novoXp = acertou ? xp + 10 : xp;
@@ -116,7 +131,7 @@ export default function QuestaoClient({
 
       <div className="flex-1 flex flex-col px-6 py-8 max-w-2xl w-full mx-auto">
         {/* Número da questão */}
-        <p className="text-xs text-gray-400 mb-2">
+        <p className="text-xs text-gray-500 mb-2">
           {indice + 1}.{" "}
           {questao.tipo_questao === "ligar"
             ? "Relacione corretamente"

@@ -11,6 +11,21 @@ export const NiveisService = {
     return await db
       .select()
       .from(niveisTable)
-      .where(eq(niveisTable.faseId, faseId)); 
+      .where(eq(niveisTable.faseId, faseId));
   },
+
+  async getById(nivelId: number) {
+    const result = await db
+      .select()
+      .from(niveisTable)
+      .where(eq(niveisTable.id, nivelId))
+      .limit(1);
+
+    return result[0] || null;
+  },
+
+  // async getById(id: number) {
+  //   const result = await db.select().from(fasesTable);
+  //   return result[0] || null;
+  // },
 };
